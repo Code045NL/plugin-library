@@ -49,6 +49,10 @@ function code045_mode_render() {
 
 function code045_server_api_key_render() {
     $options = get_option('code045_settings');
+    if (empty($options['code045_server_api_key'])) {
+        $options['code045_server_api_key'] = wp_generate_password(32, false);
+        update_option('code045_settings', $options);
+    }
     ?>
     <input type='text' name='code045_settings[code045_server_api_key]' value='<?php echo $options['code045_server_api_key']; ?>' readonly />
     <?php
@@ -64,7 +68,7 @@ function code045_client_server_url_render() {
 function code045_client_api_key_render() {
     $options = get_option('code045_settings');
     ?>
-    <input type='text' name='code045_settings[code045_client_api_key]' value='<?php echo $options['code045_client_api_key']; ?>' />
+    <p><?php echo esc_html($options['code045_client_api_key']); ?></p>
     <?php
 }
 
