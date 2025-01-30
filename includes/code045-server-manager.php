@@ -1,5 +1,5 @@
 <?php
-class Code045_Server_Plugin {
+class Code045_Server_Manager {
     private $api_key;
 
     public function __construct() {
@@ -10,8 +10,8 @@ class Code045_Server_Plugin {
 
     public function add_admin_menu() {
         add_menu_page(
-            'Code045 Plugin Server',
-            'Code045 Plugin Server',
+            'Code045 Server Manager',
+            'Code045 Server',
             'manage_options',
             'code045-server',
             array($this, 'render_admin_page'),
@@ -76,5 +76,5 @@ class Code045_Server_Plugin {
     }
 }
 
-$code045_server = new code045_Server_Plugin();
-register_activation_hook(__FILE__, array('code045_Server_Plugin', 'activate'));
+$code045_server = new Code045_Server_Manager();
+register_activation_hook(__FILE__, array('Code045_Server_Manager', 'activate'));

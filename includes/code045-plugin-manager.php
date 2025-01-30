@@ -1,5 +1,5 @@
 <?php
-class Lovable_Plugin_Manager {
+class Code045_Plugin_Manager {
     public function __construct() {
         add_action('rest_api_init', array($this, 'register_rest_routes'));
         add_action('admin_menu', array($this, 'add_admin_menu'));
@@ -7,10 +7,10 @@ class Lovable_Plugin_Manager {
 
     public function add_admin_menu() {
         add_menu_page(
-            'Lovable Plugin Manager',
-            'Lovable Plugins',
+            'Code045 Plugin Manager',
+            'Code045 Plugins',
             'manage_options',
-            'lovable-plugin-manager',
+            'code045-plugin-manager',
             array($this, 'render_admin_page'),
             'dashicons-admin-plugins'
         );
@@ -19,17 +19,17 @@ class Lovable_Plugin_Manager {
     public function render_admin_page() {
         ?>
         <div class="wrap">
-            <h1>Lovable Plugin Manager</h1>
-            <div id="lovable-plugin-manager">
-                <div class="lovable-status"></div>
-                <div class="lovable-plugins-list"></div>
+            <h1>Code045 Plugin Manager</h1>
+            <div id="code045-plugin-manager">
+                <div class="code045-status"></div>
+                <div class="code045-plugins-list"></div>
             </div>
         </div>
         <?php
     }
 
     public function register_rest_routes() {
-        register_rest_route('lovable/v1', '/plugins/check/(?P<name>[a-zA-Z0-9-_]+)', array(
+        register_rest_route('code045/v1', '/plugins/check/(?P<name>[a-zA-Z0-9-_]+)', array(
             'methods' => 'GET',
             'callback' => array($this, 'check_plugin_installation'),
             'permission_callback' => function() {
@@ -37,7 +37,7 @@ class Lovable_Plugin_Manager {
             }
         ));
 
-        register_rest_route('lovable/v1', '/plugins/install/(?P<id>[a-zA-Z0-9-]+)', array(
+        register_rest_route('code045/v1', '/plugins/install/(?P<id>[a-zA-Z0-9-]+)', array(
             'methods' => 'POST',
             'callback' => array($this, 'install_plugin'),
             'permission_callback' => function() {
@@ -100,4 +100,4 @@ class Lovable_Plugin_Manager {
     }
 }
 
-$lovable_plugin_manager = new Lovable_Plugin_Manager();
+$code045_plugin_manager = new Code045_Plugin_Manager();
