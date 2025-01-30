@@ -9,15 +9,12 @@
 register_activation_hook(__FILE__, 'code045_activate');
 add_action('admin_menu', 'code045_add_admin_menu');
 add_action('admin_init', 'code045_settings_init');
-add_action('plugins_loaded', 'code045_load_manager');
+add_action('rest_api_init', 'code045_register_rest_routes');
 
 function code045_activate() {
     $options = get_option('code045_settings');
     if (!isset($options['code045_mode'])) {
-        $options['code045_mode'] = 'client';
-    }
-    if (!isset($options['code045_server_api_key'])) {
-        $options['code045_server_api_key'] = wp_generate_password(32, false);
+        $options['code045_mode'] = '';
     }
     update_option('code045_settings', $options);
 }
@@ -41,6 +38,7 @@ function code045_mode_render() {
     $options = get_option('code045_settings');
     ?>
     <select name='code045_settings[code045_mode]' id='code045_mode'>
+        <option value='' <?php selected($options['code045_mode'], ''); ?>>Select Mode</option>
         <option value='server' <?php selected($options['code045_mode'], 'server'); ?>>Server</option>
         <option value='client' <?php selected($options['code045_mode'], 'client'); ?>>Client</option>
     </select>
@@ -96,9 +94,12 @@ function code045_options_page() {
                 if (modeSelect.value === 'server') {
                     serverFields.forEach(field => field.closest('tr').style.display = '');
                     clientFields.forEach(field => field.closest('tr').style.display = 'none');
-                } else {
+                } else if (modeSelect.value === 'client') {
                     serverFields.forEach(field => field.closest('tr').style.display = 'none');
                     clientFields.forEach(field => field.closest('tr').style.display = '');
+                } else {
+                    serverFields.forEach(field => field.closest('tr').style.display = 'none');
+                    clientFields.forEach(field => field.closest('tr').style.display = 'none');
                 }
             }
 
@@ -109,14 +110,18 @@ function code045_options_page() {
     <?php
 }
 
+function code045_register_rest_routes() {
+    // Register all REST routes here
+}
+
 function code045_load_manager() {
     $options = get_option('code045_settings');
-    $mode = isset($options['code045_mode']) ? $options['code045_mode'] : 'client'; // Default to 'client' if not set
+    $mode = isset($options['code045_mode']) ? $options['code045_mode'] : ''; // Default to '' if not set
 
     if ($mode === 'server') {
         require_once plugin_dir_path(__FILE__) . 'includes/code045-server-manager.php';
         new Code045_Server_Manager();
-    } else {
+    } else if ($mode === 'client') {
         require_once plugin_dir_path(__FILE__) . 'includes/code045-plugin-manager.php';
         new Code045_Client_Manager();
     }
