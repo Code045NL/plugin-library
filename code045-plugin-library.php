@@ -79,6 +79,26 @@ function code045_options_page() {
         submit_button();
         ?>
     </form>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const modeSelect = document.getElementById('code045_mode');
+            const serverFields = document.querySelectorAll('[name^="code045_settings[code045_server_"]');
+            const clientFields = document.querySelectorAll('[name^="code045_settings[code045_client_"]');
+
+            function toggleFields() {
+                if (modeSelect.value === 'server') {
+                    serverFields.forEach(field => field.closest('tr').style.display = '');
+                    clientFields.forEach(field => field.closest('tr').style.display = 'none');
+                } else {
+                    serverFields.forEach(field => field.closest('tr').style.display = 'none');
+                    clientFields.forEach(field => field.closest('tr').style.display = '');
+                }
+            }
+
+            modeSelect.addEventListener('change', toggleFields);
+            toggleFields();
+        });
+    </script>
     <?php
 }
 
