@@ -8,6 +8,14 @@ class Code045_Server_Manager {
     }
 
     public function register_rest_routes() {
-        // Register REST routes here
+        register_rest_route('code045/v1', '/server-endpoint', array(
+            'methods' => 'GET',
+            'callback' => array($this, 'handle_server_request'),
+            'permission_callback' => '__return_true',
+        ));
+    }
+
+    public function handle_server_request($request) {
+        return new WP_REST_Response(array('message' => 'Server response', 'api_key' => $this->api_key), 200);
     }
 }
