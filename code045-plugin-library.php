@@ -31,7 +31,6 @@ function code045_settings_init() {
     add_settings_field('code045_mode', __('Mode', 'code045'), 'code045_mode_render', 'code045_plugin_library', 'code045_plugin_library_section');
     add_settings_field('code045_server_api_key', __('Server API Key', 'code045'), 'code045_server_api_key_render', 'code045_plugin_library', 'code045_plugin_library_section');
     add_settings_field('code045_client_server_url', __('Server URL', 'code045'), 'code045_client_server_url_render', 'code045_plugin_library', 'code045_plugin_library_section');
-    add_settings_field('code045_client_api_key', __('Client API Key', 'code045'), 'code045_client_api_key_render', 'code045_plugin_library', 'code045_plugin_library_section');
 }
 
 function code045_mode_render() {
@@ -60,13 +59,6 @@ function code045_client_server_url_render() {
     $options = get_option('code045_settings');
     ?>
     <input type='text' name='code045_settings[code045_client_server_url]' value='<?php echo $options['code045_client_server_url']; ?>' />
-    <?php
-}
-
-function code045_client_api_key_render() {
-    $options = get_option('code045_settings');
-    ?>
-    <p><?php echo esc_html($options['code045_client_api_key']); ?></p>
     <?php
 }
 

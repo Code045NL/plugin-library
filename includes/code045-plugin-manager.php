@@ -7,7 +7,7 @@ class Code045_Client_Manager {
         add_action('rest_api_init', array($this, 'register_rest_routes'));
         $options = get_option('code045_settings');
         $this->server_url = $options['code045_client_server_url'];
-        $this->api_key = $options['code045_client_api_key'];
+        $this->api_key = $options['code045_server_api_key'];
     }
 
     public function register_rest_routes() {
