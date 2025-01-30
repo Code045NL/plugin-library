@@ -16,6 +16,9 @@ function code045_activate() {
     if (!isset($options['code045_mode'])) {
         $options['code045_mode'] = '';
     }
+    if (!isset($options['code045_server_api_key'])) {
+        $options['code045_server_api_key'] = wp_generate_password(32, false);
+    }
     update_option('code045_settings', $options);
 }
 

@@ -4,7 +4,8 @@ class Code045_Server_Manager {
 
     public function __construct() {
         add_action('rest_api_init', array($this, 'register_rest_routes'));
-        $this->api_key = get_option('code045_settings')['code045_server_api_key'];
+        $options = get_option('code045_settings');
+        $this->api_key = isset($options['code045_server_api_key']) ? $options['code045_server_api_key'] : '';
     }
 
     public function register_rest_routes() {
