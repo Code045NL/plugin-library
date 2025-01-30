@@ -67,8 +67,9 @@ function code045_load_manager() {
 
     if ($mode === 'server') {
         require_once plugin_dir_path(__FILE__) . 'includes/code045-server-manager.php';
+        new Code045_Server_Manager();
     } else {
         require_once plugin_dir_path(__FILE__) . 'includes/code045-plugin-manager.php';
+        new Code045_Plugin_Manager();
     }
 }
-
