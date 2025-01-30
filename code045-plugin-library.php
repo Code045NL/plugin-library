@@ -63,7 +63,9 @@ add_action('plugins_loaded', 'code045_load_manager');
 
 function code045_load_manager() {
     $options = get_option('code045_settings');
-    if ($options['code045_mode'] === 'server') {
+    $mode = isset($options['code045_mode']) ? $options['code045_mode'] : 'client'; // Default to 'client' if not set
+
+    if ($mode === 'server') {
         require_once plugin_dir_path(__FILE__) . 'includes/code045-server-manager.php';
     } else {
         require_once plugin_dir_path(__FILE__) . 'includes/code045-plugin-manager.php';
