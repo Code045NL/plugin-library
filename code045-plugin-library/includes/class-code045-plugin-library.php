@@ -56,9 +56,35 @@ class Code045_Plugin_Library {
     }
 
     public function plugins_page_html() {
-        // HTML for plugins list page
+        $remote_url = get_option('code045_remote_url');
+        $username = get_option('code045_remote_username');
+        $password = get_option('code045_remote_password');
+
+        if (empty($remote_url) || empty($username) || empty($password)) {
+            echo '<p>Please set the remote URL, username, and password in the settings page.</p>';
+            return;
+        }
+
+        $remote_connection = new Code045_Remote_Connection($remote_url, $username, $password);
+        $plugins = $remote_connection->get_installed_plugins();
+
+        if (empty($plugins)) {
+            echo '<p>No plugins found on the remote WordPress install.</p>';
+            return;
+        }
+
         echo '<h1>Installed Plugins</h1>';
-        // Add logic to list plugins from remote system
+        echo '<table class="wp-list-table widefat fixed striped">';
+        echo '<thead><tr><th>Plugin Name</th><th>Actions</th></tr></thead>';
+        echo '<tbody>';
+        foreach ($plugins as $plugin) {
+            echo '<tr>';
+            echo '<td>' . esc_html($plugin['name']) . '</td>';
+            echo '<td><a href="#" class="button">Install</a> <a href="#" class="button">Update</a></td>';
+            echo '</tr>';
+        }
+        echo '</tbody>';
+        echo '</table>';
     }
 }
 ?>
