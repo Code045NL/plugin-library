@@ -52,6 +52,26 @@ class Code045_Plugin_Library {
                 </table>
                 <?php submit_button(); ?>
             </form>
+            <?php
+            $remote_url = get_option('code045_remote_url');
+            $username = get_option('code045_remote_username');
+            $password = get_option('code045_remote_password');
+
+            if (!empty($remote_url) && !empty($username) && !empty($password)) {
+                $remote_connection = new Code045_Remote_Connection($remote_url, $username, $password);
+                $remote_connection->get_installed_plugins();
+                $errors = $remote_connection->get_errors();
+
+                if (!empty($errors)) {
+                    echo '<h2>Error Log</h2>';
+                    echo '<ul>';
+                    foreach ($errors as $error) {
+                        echo '<li>' . esc_html($error) . '</li>';
+                    }
+                    echo '</ul>';
+                }
+            }
+            ?>
         </div>
         <?php
     }
