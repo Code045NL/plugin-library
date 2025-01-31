@@ -3,6 +3,7 @@ class Code045_Plugin_Library {
 
     public function init() {
         add_action('admin_menu', array($this, 'add_admin_pages'));
+        add_action('wp_ajax_code045_install_plugin', array($this, 'install_plugin'));
     }
 
     public function add_admin_pages() {
@@ -80,11 +81,47 @@ class Code045_Plugin_Library {
         foreach ($plugins as $plugin) {
             echo '<tr>';
             echo '<td>' . esc_html($plugin['name']) . '</td>';
-            echo '<td><a href="#" class="button">Install</a> <a href="#" class="button">Update</a></td>';
+            echo '<td><a href="#" class="button code045-install-plugin" data-plugin-slug="' . esc_attr($plugin['slug']) . '">Install</a></td>';
             echo '</tr>';
         }
         echo '</tbody>';
         echo '</table>';
+        ?>
+        <script type="text/javascript">
+        jQuery(document).ready(function($) {
+            $('.code045-install-plugin').on('click', function(e) {
+                e.preventDefault();
+                var pluginSlug = $(this).data('plugin-slug');
+                $.post(ajaxurl, {
+                    action: 'code045_install_plugin',
+                    plugin_slug: pluginSlug
+                }, function(response) {
+                    alert(response.data);
+                });
+            });
+        });
+        </script>
+        <?php
+    }
+
+    public function install_plugin() {
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error('You do not have permission to perform this action.');
+        }
+
+        $plugin_slug = sanitize_text_field($_POST['plugin_slug']);
+        $remote_url = get_option('code045_remote_url');
+        $username = get_option('code045_remote_username');
+        $password = get_option('code045_remote_password');
+
+        $remote_connection = new Code045_Remote_Connection($remote_url, $username, $password);
+        $result = $remote_connection->copy_plugin($plugin_slug);
+
+        if ($result) {
+            wp_send_json_success('Plugin installed successfully.');
+        } else {
+            wp_send_json_error('Failed to install plugin.');
+        }
     }
 }
 ?>
