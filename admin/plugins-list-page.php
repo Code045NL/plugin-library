@@ -18,23 +18,22 @@ function plugin_library_plugins_list_page() {
             $zip_url = sanitize_text_field($_POST['zip_url']);
             $plugin_slug = sanitize_text_field($_POST['plugin_slug']);
 
-            // Download the zip file
-            $tmp_file = download_url($zip_url);
+            // Include necessary WordPress files for plugin installation
+            require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+            require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+            require_once ABSPATH . 'wp-admin/includes/file.php';
+            require_once ABSPATH . 'wp-admin/includes/misc.php';
 
-            if (is_wp_error($tmp_file)) {
-                echo '<p>Failed to download the zip file.</p>';
+            // Create a new instance of Plugin_Upgrader
+            $upgrader = new Plugin_Upgrader();
+
+            // Install the plugin from the zip URL
+            $result = $upgrader->install($zip_url);
+
+            if (is_wp_error($result)) {
+                echo '<p>Failed to install the plugin: ' . $result->get_error_message() . '</p>';
             } else {
-                // Extract the zip file
-                $result = unzip_file($tmp_file, WP_PLUGIN_DIR);
-
-                if (is_wp_error($result)) {
-                    echo '<p>Failed to extract the zip file.</p>';
-                } else {
-                    echo '<p>Plugin installed successfully.</p>';
-                }
-
-                // Clean up the temporary file
-                @unlink($tmp_file);
+                echo '<p>Plugin installed successfully.</p>';
             }
         }
 
