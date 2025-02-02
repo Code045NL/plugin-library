@@ -21,6 +21,7 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/class-plugin-library-client
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-plugin-library-remote-connection.php';
 require_once plugin_dir_path( __FILE__ ) . 'admin/settings-page.php';
 require_once plugin_dir_path( __FILE__ ) . 'admin/plugins-list-page.php';
+require_once plugin_dir_path(__FILE__) . 'includes/rest-api.php';
 
 // Register settings
 function plugin_library_register_settings() {
