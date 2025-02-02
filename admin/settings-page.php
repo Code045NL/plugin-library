@@ -71,7 +71,7 @@ function plugin_library_settings_page() {
         $api_keys = get_option('plugin_library_api_keys', []);
         if (!empty($api_keys)) {
             echo '<table class="wp-list-table widefat fixed striped">';
-            echo '<thead><tr><th>API Key</th><th>Client URL</th><th>Actions</th></tr></thead>';
+            echo '<thead><tr><th>API Key</th><th>Client URL</th><th>Actions</th></thead>';
             echo '<tbody>';
             foreach ($api_keys as $api_key) {
                 echo '<tr>';

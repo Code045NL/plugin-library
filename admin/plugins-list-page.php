@@ -3,15 +3,18 @@ function plugin_library_plugins_list_page() {
     $mode = get_option('plugin_library_mode', ''); // Default to server mode
 
     if ($mode === 'client') {
+        // Ensure the settings are loaded
         $remote_url = get_option('plugin_library_client_remote_url');
-        $api_key = get_option('plugin_library_client_api_key');
+        $username = get_option('plugin_library_client_username');
+        $password = get_option('plugin_library_client_password');
 
-        if (empty($remote_url) || empty($api_key)) {
-            echo '<p>Please set the remote URL and API key in the settings page.</p>';
+        if (empty($remote_url) || empty($username) || empty($password)) {
+            echo '<p>Please set the remote URL, username, and password in the settings page.</p>';
             return;
         }
 
-        $remote_connection = new Plugin_Library_Remote_Connection($remote_url, $api_key);
+        // Instantiate the remote connection class with the correct arguments
+        $remote_connection = new Plugin_Library_Remote_Connection($remote_url, $username, $password);
         $remote_plugins = $remote_connection->get_installed_plugins();
 
         if (empty($remote_plugins) || !is_array($remote_plugins)) {

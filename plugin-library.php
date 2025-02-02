@@ -51,22 +51,4 @@ function plugin_library_add_settings_page() {
         'plugin_library_settings_page'
     );
 }
-
-// Add admin menu for server mode
-function plugin_library_plugins_add_admin_menu() {
-    add_submenu_page(
-        'plugin-library',
-        'Installed Plugins',
-        'Installed Plugins',
-        'manage_options',
-        'plugin-library-plugins',
-        'plugin_library_plugins_list_page'
-    );
-}
-
-// Initialize the REST API for server mode
-function plugin_library_rest_api_init() {
-    $rest_api = new Plugin_Library_REST_API();
-    $rest_api->init();
-}
 ?>
