@@ -23,7 +23,10 @@ function plugin_library_plugins_list_page() {
         }
 
         $installed_plugins = get_plugins();
-
+        echo '<pre>';
+        var_dump($installed_plugins);
+        echo '</pre>';
+        
         echo '<h1>Installed Plugins</h1>';
         echo '<table class="wp-list-table widefat fixed striped">';
         echo '<thead><tr><th style="width: 30%;">Plugin Name</th><th>Version</th><th>Zip Version</th><th>Actions</th><th>Status</th></tr></thead>';
