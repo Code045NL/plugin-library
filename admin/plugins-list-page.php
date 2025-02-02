@@ -22,10 +22,6 @@ function plugin_library_plugins_list_page() {
             return;
         }
 
-        echo '<pre>';
-        var_dump($remote_plugins);
-        echo '</pre>';
-
         echo '<h1>Installed Plugins</h1>';
         echo '<table class="wp-list-table widefat fixed striped">';
         echo '<thead><tr><th style="width: 30%;">Plugin Name</th><th>Version</th><th>Zip Version</th><th>Actions</th><th>Status</th></tr></thead>';
@@ -149,9 +145,5 @@ function plugin_library_plugins_list_page() {
 
         }
         
-    
-    else {
-        echo '<p>Set the mode</p>';
-}
 }
 
