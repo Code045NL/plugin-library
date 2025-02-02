@@ -36,7 +36,7 @@ function fetch_remote_plugins($remote_url, $username, $password) {
 function install_remote_plugin($remote_url, $username, $password, $plugin_slug) {
     $response = wp_remote_post($remote_url . '/wp-json/plugins/v1/install', [
         'headers' => [
-            'Authorization' => 'Basic ' . base64_encode($username . ':' . $password),
+            'Authorization' => 'Bearer ' . $api_key,
         ],
         'body' => [
             'plugin_slug' => $plugin_slug,

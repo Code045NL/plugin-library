@@ -25,20 +25,20 @@ require_once plugin_dir_path( __FILE__ ) . 'admin/plugins-list-page.php';
 // Register settings
 function plugin_library_register_settings() {
     register_setting('plugin_library_client_settings', 'plugin_library_client_remote_url');
-    register_setting('plugin_library_client_settings', 'plugin_library_client_api_key');
+    register_setting('plugin_library_client_settings', 'plugin_library_client_username');
+    register_setting('plugin_library_client_settings', 'plugin_library_client_password');
     register_setting('plugin_library_server_settings', 'plugin_library_mode');
 }
 add_action('admin_init', 'plugin_library_register_settings');
 
 // Initialize the plugin
 function plugin_library_init() {
-
     // Always add the settings page
     add_action('admin_menu', 'plugin_library_add_settings_page');
-        add_action('rest_api_init', 'plugin_library_rest_api_init');
-        add_action('admin_menu', 'plugin_library_plugins_add_admin_menu');
-    }
-    
+    add_action('rest_api_init', 'plugin_library_rest_api_init');
+    add_action('admin_menu', 'plugin_library_plugins_add_admin_menu');
+}
+
 add_action('plugins_loaded', 'plugin_library_init');
 
 // Add settings page

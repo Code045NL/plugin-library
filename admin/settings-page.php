@@ -37,8 +37,12 @@ function plugin_library_settings_page() {
                         <td><input type="text" name="plugin_library_client_remote_url" value="<?php echo esc_attr(get_option('plugin_library_client_remote_url')); ?>" /></td>
                     </tr>
                     <tr valign="top">
-                        <th scope="row">API Key</th>
-                        <td><input type="text" name="plugin_library_client_api_key" value="<?php echo esc_attr(get_option('plugin_library_client_api_key')); ?>" /></td>
+                        <th scope="row">Username</th>
+                        <td><input type="text" name="plugin_library_client_username" value="<?php echo esc_attr(get_option('plugin_library_client_username')); ?>" /></td>
+                    </tr>
+                    <tr valign="top">
+                        <th scope="row">Password</th>
+                        <td><input type="password" name="plugin_library_client_password" value="<?php echo esc_attr(get_option('plugin_library_client_password')); ?>" /></td>
                     </tr>
                 </table>
                 <?php submit_button(); ?>
