@@ -19,6 +19,7 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/class-plugin-library-client
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-plugin-library-remote-connection.php';
 require_once plugin_dir_path( __FILE__ ) . 'admin/settings-page.php';
 require_once plugin_dir_path( __FILE__ ) . 'admin/plugins-list-page.php';
+require_once plugin_dir_path(__FILE__) . 'includes/rest-api.php';
 
 // Register settings
 function plugin_library_register_settings() {
@@ -63,11 +64,11 @@ function plugin_library_plugins_add_admin_menu() {
     );
 }
 
-//add style
-
+// Enqueue FontAwesome
 function plugin_library_enqueue_fontawesome() {
     wp_enqueue_style('plugin-library-fontawesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
     wp_enqueue_style('plugin-library-css', plugin_dir_url(__FILE__) . 'assets/css/style.css');
 }
+?>
 
 
