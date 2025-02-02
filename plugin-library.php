@@ -19,8 +19,7 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/class-plugin-library-rest-a
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-plugin-library-server.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-plugin-library-client.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-plugin-library-remote-connection.php';
-require_once plugin_dir_path( __FILE__ ) . 'admin/server-settings-page.php';
-require_once plugin_dir_path( __FILE__ ) . 'admin/client-settings-page.php';
+require_once plugin_dir_path( __FILE__ ) . 'admin/settings-page.php';
 require_once plugin_dir_path( __FILE__ ) . 'admin/plugins-list-page.php';
 
 // Register settings
@@ -33,20 +32,13 @@ add_action('admin_init', 'plugin_library_register_settings');
 
 // Initialize the plugin
 function plugin_library_init() {
-    $mode = get_option('plugin_library_mode', 'server'); // Default to server mode
 
     // Always add the settings page
     add_action('admin_menu', 'plugin_library_add_settings_page');
-
-    if ($mode === 'server') {
-        // Server mode
-        add_action('admin_menu', 'plugin_library_server_add_admin_menu');
         add_action('rest_api_init', 'plugin_library_rest_api_init');
-    } else {
-        // Client mode
-        add_action('admin_menu', 'plugin_library_client_add_admin_menu');
+        add_action('admin_menu', 'plugin_library_plugins_add_admin_menu');
     }
-}
+    
 add_action('plugins_loaded', 'plugin_library_init');
 
 // Add settings page
@@ -55,31 +47,19 @@ function plugin_library_add_settings_page() {
         'Plugin Library Settings',
         'Plugin Library Settings',
         'manage_options',
-        'plugin-library-settings',
-        'plugin_library_server_settings_page'
+        'plugin-library',
+        'plugin_library_settings_page'
     );
 }
 
 // Add admin menu for server mode
-function plugin_library_server_add_admin_menu() {
+function plugin_library_plugins_add_admin_menu() {
     add_submenu_page(
-        'plugin-library-settings',
+        'plugin-library',
         'Installed Plugins',
         'Installed Plugins',
         'manage_options',
         'plugin-library-plugins',
-        'plugin_library_plugins_list_page'
-    );
-}
-
-// Add admin menu for client mode
-function plugin_library_client_add_admin_menu() {
-    add_submenu_page(
-        'plugin-library-settings',
-        'Installed Plugins',
-        'Installed Plugins',
-        'manage_options',
-        'plugin-library-client-plugins',
         'plugin_library_plugins_list_page'
     );
 }

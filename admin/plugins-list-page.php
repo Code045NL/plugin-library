@@ -1,6 +1,6 @@
 <?php
 function plugin_library_plugins_list_page() {
-    $mode = get_option('plugin_library_mode', 'server'); // Default to server mode
+    $mode = get_option('plugin_library_mode', ''); // Default to server mode
 
     if ($mode === 'client') {
         $remote_url = get_option('plugin_library_client_remote_url');
@@ -44,7 +44,9 @@ function plugin_library_plugins_list_page() {
         }
         echo '</tbody>';
         echo '</table>';
-    } else {
+    } 
+
+    if ($mode === 'server') {
         // Server mode
         $installed_plugins = get_plugins();
 
@@ -65,7 +67,11 @@ function plugin_library_plugins_list_page() {
         echo '</tbody>';
         echo '</table>';
     }
+    else {
+        echo '<p>Set the mode</p>';
 }
+}
+
 
 // Handle plugin installation action
 add_action('admin_init', function() {

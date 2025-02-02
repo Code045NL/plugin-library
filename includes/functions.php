@@ -19,22 +19,6 @@ function remove_api_key($api_key) {
     update_option('plugin_library_api_keys', $api_keys);
 }
 
-// Function to create a plugin group
-function create_plugin_group($group_name, $plugins) {
-    $plugin_groups = get_option('plugin_library_groups', []);
-    $plugin_zip_urls = [];
-
-    foreach ($plugins as $plugin_slug) {
-        $plugin_data = get_plugin_data_by_slug($plugin_slug);
-        if ($plugin_data && isset($plugin_data['zip_url'])) {
-            $plugin_zip_urls[] = $plugin_data['zip_url'];
-        }
-    }
-
-    $plugin_groups[] = ['name' => $group_name, 'plugins' => $plugin_zip_urls];
-    update_option('plugin_library_groups', $plugin_groups);
-}
-
 // Function to get plugin data by slug
 function get_plugin_data_by_slug($plugin_slug) {
     $plugins = get_plugins();
