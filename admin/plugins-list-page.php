@@ -33,6 +33,12 @@ function plugin_library_plugins_list_page() {
             if (is_wp_error($result)) {
                 echo '<p>Failed to install/update the plugin: ' . $result->get_error_message() . '</p>';
             } else {
+                // Rename the plugin folder to the slug
+                $installed_plugin_dir = WP_PLUGIN_DIR . '/' . $plugin_slug;
+                $extracted_plugin_dir = WP_PLUGIN_DIR . '/' . basename($zip_url, '.zip');
+                if (is_dir($extracted_plugin_dir) && !is_dir($installed_plugin_dir)) {
+                    rename($extracted_plugin_dir, $installed_plugin_dir);
+                }
                 echo '<p>Plugin installed/updated successfully.</p>';
             }
         }
