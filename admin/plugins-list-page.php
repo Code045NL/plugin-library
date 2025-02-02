@@ -13,6 +13,31 @@ function plugin_library_plugins_list_page() {
             return;
         }
 
+        // Handle form submission for installing the plugin
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['install_plugin'])) {
+            $zip_url = sanitize_text_field($_POST['zip_url']);
+            $plugin_slug = sanitize_text_field($_POST['plugin_slug']);
+
+            // Download the zip file
+            $tmp_file = download_url($zip_url);
+
+            if (is_wp_error($tmp_file)) {
+                echo '<p>Failed to download the zip file.</p>';
+            } else {
+                // Extract the zip file
+                $result = unzip_file($tmp_file, WP_PLUGIN_DIR);
+
+                if (is_wp_error($result)) {
+                    echo '<p>Failed to extract the zip file.</p>';
+                } else {
+                    echo '<p>Plugin installed successfully.</p>';
+                }
+
+                // Clean up the temporary file
+                @unlink($tmp_file);
+            }
+        }
+
         // Instantiate the remote connection class with the correct arguments
         $remote_connection = new Plugin_Library_Remote_Connection($remote_url, $username, $password);
         $remote_plugins = $remote_connection->get_installed_plugins();
@@ -34,7 +59,13 @@ function plugin_library_plugins_list_page() {
             echo '<td>' . esc_html($remote_plugin['name']) . '</td>';
             echo '<td>' . esc_html($remote_plugin['version']) . '</td>';
             echo '<td><a href="' . esc_url($remote_plugin['zip_url']) . '">Download</a></td>';
-            echo '<td><a href="#">Install</a></td>';
+            echo '<td>';
+            echo '<form method="post" style="display:inline;">';
+            echo '<input type="hidden" name="zip_url" value="' . esc_attr($remote_plugin['zip_url']) . '">';
+            echo '<input type="hidden" name="plugin_slug" value="' . esc_attr($remote_plugin['slug']) . '">';
+            echo '<button type="submit" name="install_plugin" class="button">Install</button>';
+            echo '</form>';
+            echo '</td>';
             echo '<td>Active</td>';
             echo '</tr>';
         }
