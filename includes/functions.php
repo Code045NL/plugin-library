@@ -16,4 +16,13 @@ function get_plugin_data_by_slug($plugin_slug) {
     }
     return null;
 }
+
+add_action('wp_enqueue_scripts', 'plugin_library_enqueue_styles');
+
+// Enqueue FontAwesome
+function plugin_library_enqueue_styles() {
+    wp_enqueue_style('plugin-library-fontawesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
+    wp_enqueue_style('plugin-library-css', plugin_dir_url(__FILE__) . 'assets/css/style.css');
+}
+
 ?>
