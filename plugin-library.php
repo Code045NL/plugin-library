@@ -64,10 +64,11 @@ function plugin_library_plugins_add_admin_menu() {
         'plugin_library_plugins_list_page'
     );
 }
-add_action('wp_enqueue_scripts', 'plugin_library_enqueue_fontawesome');
+add_action('wp_enqueue_scripts', 'plugin_library_enqueue_styles');
 
 // Enqueue FontAwesome
-function plugin_library_enqueue_fontawesome() {
+function plugin_library_enqueue_styles() {
     wp_enqueue_style('plugin-library-fontawesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
+    wp_enqueue_style('plugin-library-css', plugin_dir_url(__FILE__) . 'assets/css/style.css');
 }
 
