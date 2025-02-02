@@ -64,7 +64,15 @@ function plugin_library_plugins_list_page() {
                 continue;
             }
             $plugin_slug = $remote_plugin['slug'];
-            $installed_version = isset($installed_plugins[$plugin_slug . '/' . $plugin_slug . '.php']) ? $installed_plugins[$plugin_slug . '/' . $plugin_slug . '.php']['Version'] : null;
+            $installed_version = null;
+
+            // Check if the plugin is installed
+            foreach ($installed_plugins as $plugin_file => $plugin_data) {
+                if (dirname($plugin_file) === $plugin_slug) {
+                    $installed_version = $plugin_data['Version'];
+                    break;
+                }
+            }
 
             echo '<tr>';
             echo '<td>' . esc_html($remote_plugin['name']) . '</td>';
@@ -86,7 +94,6 @@ function plugin_library_plugins_list_page() {
                 echo '<input type="hidden" name="zip_url" value="' . esc_attr($remote_plugin['zip_url']) . '">';
                 echo '<input type="hidden" name="plugin_slug" value="' . esc_attr($remote_plugin['slug']) . '">';
                 echo '<button type="submit" name="install_plugin" class="button">Install</button>';
-                echo '</form>';
             }
             echo '</td>';
             echo '<td>';
