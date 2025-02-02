@@ -35,7 +35,6 @@ add_action('admin_init', 'plugin_library_register_settings');
 function plugin_library_init() {
     // Always add the settings page
     add_action('admin_menu', 'plugin_library_add_settings_page');
-    add_action('rest_api_init', 'plugin_library_rest_api_init');
     add_action('admin_menu', 'plugin_library_plugins_add_admin_menu');
 }
 
