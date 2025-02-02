@@ -112,6 +112,8 @@ function plugin_library_plugins_list_page() {
             }
         
             echo '<div class="wrap">';
+
+            echo '<div class="remote-library">';
             echo '<h1>Installed Plugins</h1>';
             echo '<form method="post">';
             echo '<table class="wp-list-table widefat fixed striped plugin-library-table">';
@@ -137,21 +139,21 @@ function plugin_library_plugins_list_page() {
                     echo '<form method="post" style="display:inline;">';
                     echo '<input type="hidden" name="plugin_slug" value="' . esc_attr($plugin_slug) . '">';
                     echo '<input type="hidden" name="plugin_version" value="' . esc_attr($plugin_version) . '">';
-                    echo '<button type="submit" name="create_zip" class="button"></button>';
+                    echo '<button type="submit" name="create_zip" class="button"><span class="dashicons dashicons-media-archive"></span></button>';
                     echo '</form>';
                 }
                 if ($zip_exists) {
                     echo '<form method="post" style="display:inline;">';
                     echo '<input type="hidden" name="plugin_slug" value="' . esc_attr($plugin_slug) . '">';
                     echo '<input type="hidden" name="plugin_version" value="' . esc_attr($plugin_version) . '">';
-                    echo '<button type="submit" name="remove_zip" class="button"><i class="fa-solid fa-trash"></i></button>';
+                    echo '<button type="submit" name="remove_zip" class="button"><span class="dashicons dashicons-trash"></span></button>';
                     echo '</form>';
                 }
                 if ($zip_exists && version_compare($plugin_version, $zip_version, '>')) {
                     echo '<form method="post" style="display:inline;">';
                     echo '<input type="hidden" name="plugin_slug" value="' . esc_attr($plugin_slug) . '">';
                     echo '<input type="hidden" name="plugin_version" value="' . esc_attr($plugin_version) . '">';
-                    echo '<button type="submit" name="update_zip" class="button"><i class="fa-solid fa-arrow-up"></i></button>';
+                    echo '<button type="submit" name="update_zip" class="button"><span class="dashicons dashicons-update"></span></button>';
                     echo '</form>';
                 }
                 echo '</td>';
@@ -171,6 +173,8 @@ function plugin_library_plugins_list_page() {
             echo '</table>';
             echo '</form>';
             echo '</div>';
+            echo '</div>';
+
         }
         
     

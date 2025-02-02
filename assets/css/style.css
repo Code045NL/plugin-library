@@ -1,6 +1,5 @@
-button svg {
+.remote-library span.dashicons.dashicons-media-archive {
+    width: 30px;
     height: 30px;
-    position: inherit;
-    padding: 5px;
-    color: #2271b1 !important;
+    font-size: 30px;
 }
