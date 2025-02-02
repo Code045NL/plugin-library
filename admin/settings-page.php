@@ -90,4 +90,3 @@ function plugin_library_settings_page() {
         }
     }
 }
-?>
