@@ -137,7 +137,7 @@ function plugin_library_plugins_list_page() {
                     echo '<form method="post" style="display:inline;">';
                     echo '<input type="hidden" name="plugin_slug" value="' . esc_attr($plugin_slug) . '">';
                     echo '<input type="hidden" name="plugin_version" value="' . esc_attr($plugin_version) . '">';
-                    echo '<button type="submit" name="create_zip" class="button"><i class="fa-solid fa-file-zipper"></i></button>';
+                    echo '<button type="submit" name="create_zip" class="button"></button>';
                     echo '</form>';
                 }
                 if ($zip_exists) {

@@ -65,3 +65,11 @@ function plugin_library_plugins_add_admin_menu() {
     );
 }
 
+//add style
+
+function plugin_library_enqueue_fontawesome() {
+    wp_enqueue_style('plugin-library-fontawesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
+    wp_enqueue_style('plugin-library-css', plugin_dir_url(__FILE__) . 'assets/css/style.css');
+}
+
+
