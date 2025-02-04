@@ -34,6 +34,7 @@ function plugin_library_init() {
     // Always add the settings page
     add_action('admin_menu', 'plugin_library_add_settings_page');
     add_action('admin_menu', 'plugin_library_plugins_add_admin_menu');
+    add_action('wp_enqueue_scripts', 'plugin_library_enqueue_fontawesome');
     add_action('update_option_plugin_library_mode', 'plugin_library_update_mode', 10, 2);
 }
 
@@ -62,6 +63,10 @@ function plugin_library_plugins_add_admin_menu() {
     );
 }
 
+// Enqueue FontAwesome
+function plugin_library_enqueue_fontawesome() {
+    wp_enqueue_style('plugin-library-fontawesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
+}
 
 // Display the appropriate plugins list page based on the mode
 function plugin_library_plugins_list_page() {
@@ -85,5 +90,3 @@ function plugin_library_update_mode($old_value, $new_value) {
     }
 }
 ?>
-
-
