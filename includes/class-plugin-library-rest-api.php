@@ -14,11 +14,6 @@ class Plugin_Library_REST_API {
             ));
         }
 
-        register_rest_route('plugin-library/v1', '/plugin-groups', array(
-            'methods' => 'GET',
-            'callback' => array($this, 'get_plugin_groups'),
-            'permission_callback' => '__return_true',
-        ));
 
         register_rest_route('plugin-library/v1', '/install-plugin', array(
             'methods' => 'POST',
@@ -35,14 +30,14 @@ class Plugin_Library_REST_API {
         foreach ($plugins as $plugin_file => $plugin_info) {
             $slug = dirname($plugin_file);
             $plugin_version = $plugin_info['Version'];
-            $zip_file = $backup_dir . '/' . $slug . '-' . $plugin_version . '.zip';
+            $zip_file = $backup_dir . '/' . $slug  . '.zip';
             $zip_exists = file_exists($zip_file);
 
             $plugin_data[] = array(
                 'name' => $plugin_info['Name'],
                 'version' => $plugin_version,
                 'slug' => $slug,
-                'zip_url' => $zip_exists ? home_url('/plugin-library/' . $slug . '-' . $plugin_version . '.zip') : null,
+                'zip_url' => $zip_exists ? home_url('/plugin-library/' . $slug  . '.zip') : null,
                 'zip_exists' => $zip_exists
             );
         }
