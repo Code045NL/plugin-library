@@ -11,25 +11,21 @@ function plugin_library_server_plugins_list_page() {
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && (isset($_POST['create_zip']) || isset($_POST['update_zip']))) {
         $plugin_slug = sanitize_text_field($_POST['plugin_slug']);
-        $plugin_version = sanitize_text_field($_POST['plugin_version']);
         $plugin_dir = WP_PLUGIN_DIR . '/' . $plugin_slug;
 
         // Delete older version zip files
-        $old_zip_files = glob($backup_dir . '/' . $plugin_slug . '-*.zip');
+        $old_zip_files = glob($backup_dir . '/' . $plugin_slug . '*.zip');
         foreach ($old_zip_files as $old_zip_file) {
-            if (basename($old_zip_file) !== $plugin_slug . '-' . $plugin_version . '.zip') {
-                unlink($old_zip_file);
-            }
+            unlink($old_zip_file);
         }
 
-        create_plugin_zip($plugin_dir, $backup_dir, $plugin_slug, $plugin_version);
+        create_plugin_zip($plugin_dir, $backup_dir, $plugin_slug);
         echo '<div class="updated"><p>Zip file created/updated for ' . esc_html($plugin_slug) . '.</p></div>';
     }
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remove_zip'])) {
         $plugin_slug = sanitize_text_field($_POST['plugin_slug']);
-        $plugin_version = sanitize_text_field($_POST['plugin_version']);
-        $zip_file = $backup_dir . '/' . $plugin_slug . '-' . $plugin_version . '.zip';
+        $zip_file = $backup_dir . '/' . $plugin_slug . '.zip';
         if (file_exists($zip_file)) {
             unlink($zip_file);
             echo '<div class="updated"><p>Zip file removed for ' . esc_html($plugin_slug) . '.</p></div>';
@@ -49,7 +45,7 @@ function plugin_library_server_plugins_list_page() {
             continue; // Skip the plugin-library plugin
         }
         $plugin_version = $plugin_data['Version'];
-        $zip_file = $backup_dir . '/' . $plugin_slug . '-' . $plugin_version . '.zip';
+        $zip_file = $backup_dir . '/' . $plugin_slug . '.zip';
         $zip_exists = file_exists($zip_file);
         $zip_version = $zip_exists ? $plugin_version : 'N/A';
 
@@ -61,14 +57,12 @@ function plugin_library_server_plugins_list_page() {
         if ($zip_exists) {
             echo '<form method="post" style="display:inline;">';
             echo '<input type="hidden" name="plugin_slug" value="' . esc_attr($plugin_slug) . '">';
-            echo '<input type="hidden" name="plugin_version" value="' . esc_attr($plugin_version) . '">';
             echo '<button type="submit" name="update_zip" class="button">Update Zip</button>';
             echo '<button type="submit" name="remove_zip" class="button">Remove Zip</button>';
             echo '</form>';
         } else {
             echo '<form method="post" style="display:inline;">';
             echo '<input type="hidden" name="plugin_slug" value="' . esc_attr($plugin_slug) . '">';
-            echo '<input type="hidden" name="plugin_version" value="' . esc_attr($plugin_version) . '">';
             echo '<button type="submit" name="create_zip" class="button">Create Zip</button>';
             echo '</form>';
         }

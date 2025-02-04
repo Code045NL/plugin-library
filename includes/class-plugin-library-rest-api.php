@@ -1,16 +1,18 @@
 <?php
 class Plugin_Library_REST_API {
-
-    public function init() {
+    public function __construct() {
         add_action('rest_api_init', array($this, 'register_routes'));
     }
 
     public function register_routes() {
-        register_rest_route('plugin-library/v1', '/plugins', array(
-            'methods' => 'GET',
-            'callback' => array($this, 'get_installed_plugins'),
-            'permission_callback' => '__return_true',
-        ));
+        $mode = get_option('plugin_library_mode', ''); // Default to empty
+
+        if ($mode === 'server') {
+            register_rest_route('plugin-library/v1', '/plugins', array(
+                'methods' => 'GET',
+                'callback' => array($this, 'get_plugins'),
+            ));
+        }
 
         register_rest_route('plugin-library/v1', '/plugin-groups', array(
             'methods' => 'GET',
@@ -25,19 +27,27 @@ class Plugin_Library_REST_API {
         ));
     }
 
-    public function get_installed_plugins() {
+    public function get_plugins() {
         $plugins = get_plugins();
         $plugin_data = array();
+        $backup_dir = ABSPATH . 'plugin-library';
 
         foreach ($plugins as $plugin_file => $plugin_info) {
+            $slug = dirname($plugin_file);
+            $plugin_version = $plugin_info['Version'];
+            $zip_file = $backup_dir . '/' . $slug . '-' . $plugin_version . '.zip';
+            $zip_exists = file_exists($zip_file);
+
             $plugin_data[] = array(
                 'name' => $plugin_info['Name'],
-                'version' => $plugin_info['Version'],
-                'slug' => dirname($plugin_file),
+                'version' => $plugin_version,
+                'slug' => $slug,
+                'zip_url' => $zip_exists ? home_url('/plugin-library/' . $slug . '-' . $plugin_version . '.zip') : null,
+                'zip_exists' => $zip_exists
             );
         }
 
-        return rest_ensure_response($plugin_data);
+        return new WP_REST_Response($plugin_data, 200);
     }
 
     public function get_plugin_groups() {
@@ -70,4 +80,7 @@ class Plugin_Library_REST_API {
         return rest_ensure_response(array('success' => true));
     }
 }
+
+// Initialize the REST API class
+new Plugin_Library_REST_API();
 ?>

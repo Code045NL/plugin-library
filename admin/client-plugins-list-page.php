@@ -59,7 +59,7 @@ function plugin_library_client_plugins_list_page() {
     echo '<thead><tr><th style="width: 30%;">Plugin Name</th><th>Version</th><th>Zip Version</th><th>Actions</th><th>Status</th></tr></thead>';
     echo '<tbody>';
     foreach ($remote_plugins as $remote_plugin) {
-        if (!is_array($remote_plugin) || !isset($remote_plugin['name'], $remote_plugin['version'], $remote_plugin['zip_url'])) {
+        if (!is_array($remote_plugin) || !isset($remote_plugin['name'], $remote_plugin['version'], $remote_plugin['zip_url']) || !$remote_plugin['zip_exists']) {
             continue;
         }
         $plugin_slug = $remote_plugin['slug'];
