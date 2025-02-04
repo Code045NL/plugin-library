@@ -1,0 +1,15 @@
+.remote-library .dashicons{
+    font-size: 16px;
+    vertical-align:middle;
+}
+
+.remote-library .button, .remote-library .button-secondary{
+    color: #2271b1;
+    background: none;
+    border: 0px;
+    padding:0px;
+}
+
+.remote-library .widefat td {
+    vertical-align: middle;
+}

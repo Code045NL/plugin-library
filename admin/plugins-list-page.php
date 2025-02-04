@@ -54,7 +54,7 @@ function plugin_library_plugins_list_page() {
             echo '<p>No plugins found on the remote WordPress install.</p>';
             return;
         }
-
+        echo '<div class="remote-library">';
         echo '<h1>Installed Plugins</h1>';
         echo '<table class="wp-list-table widefat fixed striped">';
         echo '<thead><tr><th style="width: 30%;">Plugin Name</th><th>Version</th><th>Zip Version</th><th>Actions</th><th>Status</th></tr></thead>';
@@ -178,31 +178,31 @@ function plugin_library_plugins_list_page() {
                 echo '<form method="post" style="display:inline;">';
                 echo '<input type="hidden" name="plugin_slug" value="' . esc_attr($plugin_slug) . '">';
                 echo '<input type="hidden" name="plugin_version" value="' . esc_attr($plugin_version) . '">';
-                echo '<button type="submit" name="create_zip" class="button"><span class="dashicons dashicons-media-archive"></span></button>';
+                echo '<button type="submit" name="create_zip" class="button"><span class="dashicons dashicons-media-archive"></span>Create</button>';
                 echo '</form>';
             }
             if ($zip_exists) {
                 echo '<form method="post" style="display:inline;">';
                 echo '<input type="hidden" name="plugin_slug" value="' . esc_attr($plugin_slug) . '">';
                 echo '<input type="hidden" name="plugin_version" value="' . esc_attr($plugin_version) . '">';
-                echo '<button type="submit" name="remove_zip" class="button"><span class="dashicons dashicons-trash"></span></button>';
+                echo '<button type="submit" name="remove_zip" class="button"><span class="dashicons dashicons-trash"></span>Remove</button>';
                 echo '</form>';
             }
             if ($zip_exists && version_compare($plugin_version, $zip_version, '>')) {
                 echo '<form method="post" style="display:inline;">';
                 echo '<input type="hidden" name="plugin_slug" value="' . esc_attr($plugin_slug) . '">';
                 echo '<input type="hidden" name="plugin_version" value="' . esc_attr($plugin_version) . '">';
-                echo '<button type="submit" name="update_zip" class="button"><span class="dashicons dashicons-update"></span></button>';
+                echo '<button type="submit" name="update_zip" class="button"><span class="dashicons dashicons-update"></span>Update</button>';
                 echo '</form>';
             }
             echo '</td>';
             echo '<td>';
             if (!$zip_exists) {
-                echo '<span style="color: red;">&#x25CF; Create Zip</span>';
+                echo '<span style="color: red;">&#x25CF;</span>';
             } elseif ($zip_exists && version_compare($plugin_version, $zip_version, '>')) {
-                echo '<span style="color: orange;">&#x25CF; Update Available</span>';
+                echo '<span style="color: orange;">&#x25CF;</span>';
             } else {
-                echo '<span style="color: green;">&#x25CF; Plugin Available</span>';
+                echo '<span style="color: green;">&#x25CF;</span>';
             }
             echo '</td>';
             echo '</tr>';

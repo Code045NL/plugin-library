@@ -15,7 +15,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once plugin_dir_path( __FILE__ ) . 'includes/functions.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/zip-functions.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-plugin-library-rest-api.php';
-require_once plugin_dir_path( __FILE__ ) . 'includes/class-plugin-library-client.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-plugin-library-remote-connection.php';
 require_once plugin_dir_path( __FILE__ ) . 'admin/settings-page.php';
 require_once plugin_dir_path( __FILE__ ) . 'admin/plugins-list-page.php';
@@ -36,7 +35,7 @@ function plugin_library_init() {
     add_action('admin_menu', 'plugin_library_add_settings_page');
     add_action('rest_api_init', 'plugin_library_rest_api_init');
     add_action('admin_menu', 'plugin_library_plugins_add_admin_menu');
-    add_action('wp_enqueue_scripts', 'plugin_library_enqueue_fontawesome');
+	add_action( 'admin_enqueue_scripts', 'enqueue_admin_style' );
 }
 
 add_action('plugins_loaded', 'plugin_library_init');
@@ -64,10 +63,8 @@ function plugin_library_plugins_add_admin_menu() {
     );
 }
 
-// Enqueue FontAwesome
-function plugin_library_enqueue_fontawesome() {
-    wp_enqueue_style('plugin-library-fontawesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
-    wp_enqueue_style('plugin-library-css', plugin_dir_url(__FILE__) . 'assets/css/style.css');
+function enqueue_admin_style() {
+wp_enqueue_style( 'admin-style', plugin_dir_url( __FILE__ ) . 'assets/css/admin-style.css',array(), null  );
 }
 ?>
 
