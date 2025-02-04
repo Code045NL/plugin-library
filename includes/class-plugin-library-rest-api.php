@@ -1,4 +1,6 @@
 <?php
+// filepath: /workspaces/plugin-library/includes/class-plugin-library-rest-api.php
+
 class Plugin_Library_REST_API {
     public function __construct() {
         add_action('rest_api_init', array($this, 'register_routes'));
@@ -13,7 +15,6 @@ class Plugin_Library_REST_API {
                 'callback' => array($this, 'get_plugins'),
             ));
         }
-
 
         register_rest_route('plugin-library/v1', '/install-plugin', array(
             'methods' => 'POST',
@@ -30,14 +31,14 @@ class Plugin_Library_REST_API {
         foreach ($plugins as $plugin_file => $plugin_info) {
             $slug = dirname($plugin_file);
             $plugin_version = $plugin_info['Version'];
-            $zip_file = $backup_dir . '/' . $slug  . '.zip';
+            $zip_file = $backup_dir . '/' . $slug . '.zip';
             $zip_exists = file_exists($zip_file);
 
             $plugin_data[] = array(
                 'name' => $plugin_info['Name'],
                 'version' => $plugin_version,
                 'slug' => $slug,
-                'zip_url' => $zip_exists ? home_url('/plugin-library/' . $slug  . '.zip') : null,
+                'zip_url' => $zip_exists ? home_url('/plugin-library/' . $slug . '.zip') : null,
                 'zip_exists' => $zip_exists
             );
         }
@@ -45,34 +46,33 @@ class Plugin_Library_REST_API {
         return new WP_REST_Response($plugin_data, 200);
     }
 
-    public function get_plugin_groups() {
-        $plugin_groups = get_option('plugin_library_groups', array());
-        return rest_ensure_response($plugin_groups);
-    }
-
     public function install_plugin(WP_REST_Request $request) {
-        $plugin_slug = $request->get_param('plugin_slug');
-        $plugin_zip_url = $request->get_param('plugin_zip_url');
+        $zip_url = sanitize_text_field($request->get_param('zip_url'));
+        $plugin_slug = sanitize_text_field($request->get_param('plugin_slug'));
 
-        if (empty($plugin_slug) || empty($plugin_zip_url)) {
-            return new WP_Error('missing_params', 'Missing required parameters', array('status' => 400));
-        }
+        // Include necessary WordPress files for plugin installation
+        require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+        require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
+        require_once ABSPATH . 'wp-admin/includes/file.php';
+        require_once ABSPATH . 'wp-admin/includes/misc.php';
 
-        $temp_file = download_url($plugin_zip_url);
+        // Create a new instance of Plugin_Upgrader
+        $upgrader = new Plugin_Upgrader();
 
-        if (is_wp_error($temp_file)) {
-            return $temp_file;
-        }
-
-        $result = unzip_file($temp_file, WP_PLUGIN_DIR);
-
-        unlink($temp_file);
+        // Install the plugin from the zip URL
+        $result = $upgrader->install($zip_url);
 
         if (is_wp_error($result)) {
-            return $result;
+            return new WP_REST_Response(array('success' => false, 'message' => $result->get_error_message()), 400);
+        } else {
+            // Rename the plugin folder to the slug
+            $installed_plugin_dir = WP_PLUGIN_DIR . '/' . $plugin_slug;
+            $extracted_plugin_dir = WP_PLUGIN_DIR . '/' . $upgrader->result['destination_name'];
+            if (is_dir($extracted_plugin_dir) && !is_dir($installed_plugin_dir)) {
+                rename($extracted_plugin_dir, $installed_plugin_dir);
+            }
+            return new WP_REST_Response(array('success' => true, 'message' => 'Plugin installed successfully.'), 200);
         }
-
-        return rest_ensure_response(array('success' => true));
     }
 }
 
