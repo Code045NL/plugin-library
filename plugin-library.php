@@ -43,23 +43,23 @@ add_action('plugins_loaded', 'plugin_library_init');
 // Add settings page
 function plugin_library_add_settings_page() {
     add_menu_page(
-        'Plugin Library Settings',
-        'Plugin Library Settings',
+        'Remote Plugin Library ',
+        'Remote Plugin Library ',
         'manage_options',
-        'plugin-library',
-        'plugin_library_settings_page'
+        'remote-library',
+        'plugin_library_plugins_list_page'
     );
 }
 
 // Add plugins list page
 function plugin_library_plugins_add_admin_menu() {
     add_submenu_page(
-        'plugin-library',
-        'Plugins List',
-        'Plugins List',
+        'remote-library',
+        'Remote Plugin Settings',
+        'Remote Plugin Settings',
         'manage_options',
-        'plugin-library-plugins',
-        'plugin_library_plugins_list_page'
+        'remote-library-settings',
+        'plugin_library_settings_page'
     );
 }
 

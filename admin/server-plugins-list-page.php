@@ -35,7 +35,7 @@ function plugin_library_server_plugins_list_page() {
     }
 
     echo '<div class="wrap">';
-    echo '<h1>Installed Plugins</h1>';
+    echo '<h1>Remote Plugin Manager</h1>';
     echo '<table class="wp-list-table widefat fixed striped">';
     echo '<thead><tr><th style="width: 30%;">Plugin Name</th><th>Version</th><th>Zip Version</th><th>Actions</th><th>Status</th></tr></thead>';
     echo '<tbody>';
