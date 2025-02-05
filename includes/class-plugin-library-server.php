@@ -231,5 +231,29 @@ class Plugin_Library_Server {
             array('%s')
         );
     }
+
+    public function clean_database() {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'plugin_library_api_info';
+
+        // Remove duplicate rows
+        $wpdb->query("
+            DELETE t1 FROM $table_name t1
+            INNER JOIN $table_name t2 
+            WHERE 
+                t1.id < t2.id AND 
+                t1.plugin_slug = t2.plugin_slug
+        ");
+
+        // Remove rows for deleted plugins
+        $installed_plugins = get_plugins();
+        $installed_slugs = array_map('dirname', array_keys($installed_plugins));
+
+        $placeholders = implode(',', array_fill(0, count($installed_slugs), '%s'));
+        $wpdb->query($wpdb->prepare("
+            DELETE FROM $table_name 
+            WHERE plugin_slug NOT IN ($placeholders)
+        ", $installed_slugs));
+    }
 }
 ?>
