@@ -1,6 +1,4 @@
 <?php
-// filepath: /workspaces/plugin-library/includes/class-plugin-library-rest-api.php
-
 class Plugin_Library_REST_API {
     public function __construct() {
         add_action('rest_api_init', array($this, 'register_routes'));
@@ -24,26 +22,11 @@ class Plugin_Library_REST_API {
     }
 
     public function get_plugins() {
-        $plugins = get_plugins();
-        $plugin_data = array();
-        $backup_dir = ABSPATH . 'plugin-library';
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'plugin_library_api_info';
+        $results = $wpdb->get_results("SELECT * FROM $table_name", ARRAY_A);
 
-        foreach ($plugins as $plugin_file => $plugin_info) {
-            $slug = dirname($plugin_file);
-            $plugin_version = $plugin_info['Version'];
-            $zip_file = $backup_dir . '/' . $slug . '.zip';
-            $zip_exists = file_exists($zip_file);
-
-            $plugin_data[] = array(
-                'name' => $plugin_info['Name'],
-                'version' => $plugin_version,
-                'slug' => $slug,
-                'zip_url' => $zip_exists ? home_url('/plugin-library/' . $slug . '.zip') : null,
-                'zip_exists' => $zip_exists
-            );
-        }
-
-        return new WP_REST_Response($plugin_data, 200);
+        return new WP_REST_Response($results, 200);
     }
 
     public function install_plugin(WP_REST_Request $request) {
@@ -71,6 +54,26 @@ class Plugin_Library_REST_API {
             if (is_dir($extracted_plugin_dir) && !is_dir($installed_plugin_dir)) {
                 rename($extracted_plugin_dir, $installed_plugin_dir);
             }
+
+            // Store plugin info in the custom table
+            global $wpdb;
+            $table_name = $wpdb->prefix . 'plugin_library_api_info';
+            $wpdb->replace(
+                $table_name,
+                array(
+                    'plugin_slug' => $plugin_slug,
+                    'plugin_name' => $upgrader->result['destination_name'],
+                    'plugin_version' => $upgrader->result['destination_name'],
+                    'zip_url' => $zip_url,
+                ),
+                array(
+                    '%s',
+                    '%s',
+                    '%s',
+                    '%s',
+                )
+            );
+
             return new WP_REST_Response(array('success' => true, 'message' => 'Plugin installed successfully.'), 200);
         }
     }
@@ -78,4 +81,3 @@ class Plugin_Library_REST_API {
 
 // Initialize the REST API class
 new Plugin_Library_REST_API();
-?>

@@ -26,6 +26,15 @@ function plugin_library_client_plugins_list_page() {
         // Create a new instance of Plugin_Upgrader
         $upgrader = new Plugin_Upgrader();
 
+        // Delete the existing plugin folder if it exists
+        $installed_plugin_dir = WP_PLUGIN_DIR . '/' . $plugin_slug;
+        if (is_dir($installed_plugin_dir)) {
+            // Use the delete function from the WordPress Filesystem API
+            global $wp_filesystem;
+            WP_Filesystem();
+            $wp_filesystem->delete($installed_plugin_dir, true);
+        }
+
         // Install or update the plugin from the zip URL
         $result = $upgrader->install($zip_url);
 
@@ -33,7 +42,6 @@ function plugin_library_client_plugins_list_page() {
             echo '<p>Failed to install/update the plugin: ' . $result->get_error_message() . '</p>';
         } else {
             // Rename the plugin folder to the slug
-            $installed_plugin_dir = WP_PLUGIN_DIR . '/' . $plugin_slug;
             $extracted_plugin_dir = WP_PLUGIN_DIR . '/' . $upgrader->result['destination_name'];
             if (is_dir($extracted_plugin_dir) && !is_dir($installed_plugin_dir)) {
                 rename($extracted_plugin_dir, $installed_plugin_dir);
@@ -45,24 +53,34 @@ function plugin_library_client_plugins_list_page() {
     // Get the list of installed plugins on the client
     $installed_plugins = get_plugins();
 
-    // Instantiate the remote connection class with the correct arguments
-    $remote_connection = new Plugin_Library_Remote_Connection($remote_url, $username, $password);
-    $remote_plugins = $remote_connection->get_installed_plugins();
+    // Fetch remote plugins from the custom table
+    $response = wp_remote_get($remote_url . '/wp-json/plugin-library/v1/plugins', array(
+        'headers' => array(
+            'Authorization' => 'Basic ' . base64_encode($username . ':' . $password),
+        ),
+    ));
+
+    if (is_wp_error($response)) {
+        echo '<p>Failed to fetch remote plugins: ' . $response->get_error_message() . '</p>';
+        return;
+    }
+
+    $remote_plugins = json_decode(wp_remote_retrieve_body($response), true);
 
     if (empty($remote_plugins) || !is_array($remote_plugins)) {
         echo '<p>No plugins found on the remote WordPress install.</p>';
         return;
     }
 
-    echo '<h1>Remote Library</h1>';
+    echo '<h1>Installed Plugins</h1>';
     echo '<table class="wp-list-table widefat fixed striped">';
     echo '<thead><tr><th style="width: 30%;">Plugin Name</th><th>Version</th><th>Zip Version</th><th>Actions</th><th>Status</th></tr></thead>';
     echo '<tbody>';
     foreach ($remote_plugins as $remote_plugin) {
-        if (!is_array($remote_plugin) || !isset($remote_plugin['name'], $remote_plugin['version'], $remote_plugin['zip_url']) || !$remote_plugin['zip_exists']) {
+        if (!is_array($remote_plugin) || !isset($remote_plugin['plugin_name'], $remote_plugin['plugin_version'], $remote_plugin['zip_url'])) {
             continue;
         }
-        $plugin_slug = $remote_plugin['slug'];
+        $plugin_slug = $remote_plugin['plugin_slug'];
         $installed_version = null;
 
         // Check if the plugin is installed
@@ -74,15 +92,15 @@ function plugin_library_client_plugins_list_page() {
         }
 
         echo '<tr>';
-        echo '<td>' . esc_html($remote_plugin['name']) . '</td>';
-        echo '<td>' . esc_html($remote_plugin['version']) . '</td>';
+        echo '<td>' . esc_html($remote_plugin['plugin_name']) . '</td>';
+        echo '<td>' . esc_html($remote_plugin['plugin_version']) . '</td>';
         echo '<td><a href="' . esc_url($remote_plugin['zip_url']) . '">Download</a></td>';
         echo '<td>';
         if ($installed_version) {
-            if (version_compare($remote_plugin['version'], $installed_version, '>')) {
+            if (version_compare($remote_plugin['plugin_version'], $installed_version, '>')) {
                 echo '<form method="post" style="display:inline;">';
                 echo '<input type="hidden" name="zip_url" value="' . esc_attr($remote_plugin['zip_url']) . '">';
-                echo '<input type="hidden" name="plugin_slug" value="' . esc_attr($remote_plugin['slug']) . '">';
+                echo '<input type="hidden" name="plugin_slug" value="' . esc_attr($remote_plugin['plugin_slug']) . '">';
                 echo '<button type="submit" name="update_plugin" class="button">Update</button>';
                 echo '</form>';
             } else {
@@ -91,13 +109,13 @@ function plugin_library_client_plugins_list_page() {
         } else {
             echo '<form method="post" style="display:inline;">';
             echo '<input type="hidden" name="zip_url" value="' . esc_attr($remote_plugin['zip_url']) . '">';
-            echo '<input type="hidden" name="plugin_slug" value="' . esc_attr($remote_plugin['slug']) . '">';
+            echo '<input type="hidden" name="plugin_slug" value="' . esc_attr($remote_plugin['plugin_slug']) . '">';
             echo '<button type="submit" name="install_plugin" class="button">Install</button>';
         }
         echo '</td>';
         echo '<td>';
         if ($installed_version) {
-            if (version_compare($remote_plugin['version'], $installed_version, '>')) {
+            if (version_compare($remote_plugin['plugin_version'], $installed_version, '>')) {
                 echo '<span style="color: orange;">&#x25CF; Update Available</span>';
             } else {
                 echo '<span style="color: green;">&#x25CF; Plugin Available</span>';
