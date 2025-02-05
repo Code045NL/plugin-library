@@ -38,11 +38,25 @@ class Plugin_Library_Server {
     }
 
     public function get_plugins() {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'plugin_library_api_info';
-        $results = $wpdb->get_results("SELECT * FROM $table_name", ARRAY_A);
-
-        return new WP_REST_Response($results, 200);
+        // Load the WordPress plugin library
+        if (!function_exists('get_plugins')) {
+            require_once ABSPATH . 'wp-admin/includes/plugin.php';
+        }
+    
+        // Get all plugins
+        $all_plugins = get_plugins();
+    
+        // Prepare the response
+        $plugins = array();
+        foreach ($all_plugins as $plugin_file => $plugin_data) {
+            $plugins[] = array(
+                'slug' => dirname($plugin_file),
+                'name' => $plugin_data['Name'],
+                'version' => $plugin_data['Version'],
+            );
+        }
+    
+        return new WP_REST_Response($plugins, 200);
     }
 
     public function install_plugin(WP_REST_Request $request) {
