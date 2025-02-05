@@ -2,7 +2,7 @@
 /*
  * Plugin Name: Plugin Library
  * Description: Provides zip files for installed plugins and manages plugins through the Code045 Plugin Management System.
- * Version: 2.1.0
+ * Version: 2.2.0
  * Author: Code045
  */
 
@@ -12,127 +12,76 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Include necessary files
-require_once plugin_dir_path( __FILE__ ) . 'includes/functions.php';
-require_once plugin_dir_path( __FILE__ ) . 'includes/zip-functions.php';
-require_once plugin_dir_path( __FILE__ ) . 'includes/class-plugin-library-rest-api.php';
-require_once plugin_dir_path( __FILE__ ) . 'includes/class-plugin-library-remote-connection.php';
-require_once plugin_dir_path( __FILE__ ) . 'admin/settings-page.php';
-require_once plugin_dir_path( __FILE__ ) . 'admin/client-plugins-list-page.php';
-require_once plugin_dir_path( __FILE__ ) . 'admin/server-plugins-list-page.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-plugin-library-server.php';
+require_once plugin_dir_path( __FILE__ ) . 'includes/class-plugin-library-client.php';
 
 // Register settings
 function plugin_library_register_settings() {
-    register_setting('plugin_library_client_settings', 'plugin_library_client_remote_url');
-    register_setting('plugin_library_client_settings', 'plugin_library_client_username');
-    register_setting('plugin_library_client_settings', 'plugin_library_client_password');
-    register_setting('plugin_library_server_settings', 'plugin_library_mode');
+    register_setting('plugin_library_settings', 'plugin_library_mode');
 }
 add_action('admin_init', 'plugin_library_register_settings');
 
 // Initialize the plugin
 function plugin_library_init() {
-    // Always add the settings page
-    add_action('admin_menu', 'plugin_library_add_settings_page');
-    add_action('admin_menu', 'plugin_library_plugins_add_admin_menu');
-    add_action('wp_enqueue_scripts', 'plugin_library_enqueue_fontawesome');
-    add_action('update_option_plugin_library_mode', 'plugin_library_update_mode', 10, 2);
-    add_action('upgrader_process_complete', 'plugin_library_upgrader_process_complete', 10, 2);
-    add_action('deleted_plugin', 'plugin_library_deleted_plugin', 10, 2);
+    // Always add the general settings page
+    add_action('admin_menu', 'plugin_library_add_general_settings_page');
+    add_action('admin_enqueue_scripts', 'plugin_library_enqueue_admin_styles');
+
+    // Conditionally include and initialize the correct class based on the mode
+    $mode = get_option('plugin_library_mode', ''); // Default to empty
+
+    if ($mode === 'server') {
+        $server = new Plugin_Library_Server();
+        $server->create_custom_table();
+    } elseif ($mode === 'client') {
+        $client = new Plugin_Library_Client();
+        $client->create_custom_table();
+    }
 }
 
 add_action('plugins_loaded', 'plugin_library_init');
 
-// Add settings page
-function plugin_library_add_settings_page() {
+// Add general settings page
+function plugin_library_add_general_settings_page() {
     add_menu_page(
-        'Remote Plugin Library ',
-        'Remote Plugin Library ',
+        'Plugin Library Settings',
+        'Plugin Library Settings',
         'manage_options',
-        'remote-library',
-        'plugin_library_plugins_list_page'
-    );
-}
-
-// Add plugins list page
-function plugin_library_plugins_add_admin_menu() {
-    add_submenu_page(
-        'remote-library',
-        'Remote Plugin Settings',
-        'Remote Plugin Settings',
-        'manage_options',
-        'remote-library-settings',
+        'plugin-library-settings',
         'plugin_library_settings_page'
     );
 }
 
-// Enqueue FontAwesome
-function plugin_library_enqueue_fontawesome() {
-    wp_enqueue_style('plugin-library-fontawesome', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
+// General settings page callback
+function plugin_library_settings_page() {
+    ?>
+    <div class="wrap">
+        <h1>Plugin Library Settings</h1>
+        <form method="post" action="options.php">
+            <?php
+            settings_fields('plugin_library_settings');
+            do_settings_sections('plugin_library_settings');
+            ?>
+            <table class="form-table">
+                <tr valign="top">
+                    <th scope="row">Mode</th>
+                    <td>
+                        <select name="plugin_library_mode">
+                            <option value="" <?php selected(get_option('plugin_library_mode'), ''); ?>>Select Mode</option>
+                            <option value="client" <?php selected(get_option('plugin_library_mode'), 'client'); ?>>Client</option>
+                            <option value="server" <?php selected(get_option('plugin_library_mode'), 'server'); ?>>Server</option>
+                        </select>
+                    </td>
+                </tr>
+            </table>
+            <?php submit_button(); ?>
+        </form>
+    </div>
+    <?php
 }
 
-// Display the appropriate plugins list page based on the mode
-function plugin_library_plugins_list_page() {
-    $mode = get_option('plugin_library_mode', ''); // Default to empty
-
-    if ($mode === 'client') {
-        plugin_library_client_plugins_list_page();
-    } elseif ($mode === 'server') {
-        plugin_library_server_plugins_list_page();
-    } else {
-        echo '<div class="notice notice-warning"><p>Please set the mode to either "client" or "server" in the Plugin Library settings page.</p></div>';
-    }
-}
-
-// Update mode and register/unregister REST API routes
-function plugin_library_update_mode($old_value, $new_value) {
-    if ($new_value === 'server') {
-        add_action('rest_api_init', array('Plugin_Library_REST_API', 'register_routes'));
-    } elseif ($new_value === 'client') {
-        remove_action('rest_api_init', array('Plugin_Library_REST_API', 'register_routes'));
-    }
-}
-
-// Handle plugin installations and updates
-function plugin_library_upgrader_process_complete($upgrader_object, $options) {
-    if ($options['type'] === 'plugin' && ($options['action'] === 'install' || $options['action'] === 'update')) {
-        $plugin_slug = dirname($options['plugin']);
-        $plugin_data = get_plugin_data(WP_PLUGIN_DIR . '/' . $options['plugin']);
-        $plugin_name = $plugin_data['Name'];
-        $plugin_version = $plugin_data['Version'];
-        $zip_url = home_url('/plugin-library/' . $plugin_slug . '.zip');
-
-        // Update the custom table
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'plugin_library_api_info';
-        $wpdb->replace(
-            $table_name,
-            array(
-                'plugin_slug' => $plugin_slug,
-                'plugin_name' => $plugin_name,
-                'plugin_version' => $plugin_version,
-                'zip_url' => $zip_url,
-            ),
-            array(
-                '%s',
-                '%s',
-                '%s',
-                '%s',
-            )
-        );
-    }
-}
-
-// Handle plugin deletions
-function plugin_library_deleted_plugin($plugin) {
-    $plugin_slug = dirname($plugin);
-
-    // Delete the entry from the custom table
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'plugin_library_api_info';
-    $wpdb->delete(
-        $table_name,
-        array('plugin_slug' => $plugin_slug),
-        array('%s')
-    );
+// Enqueue admin styles
+function plugin_library_enqueue_admin_styles() {
+    wp_enqueue_style('plugin-library-admin-style', plugin_dir_url(__FILE__) . 'admin/admin-style.css');
 }
 ?>
