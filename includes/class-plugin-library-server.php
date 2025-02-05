@@ -59,22 +59,22 @@ class Plugin_Library_Server {
         return new WP_REST_Response($plugins, 200);
     }
 
-    public function install_plugin(WP_REST_Request $request) {
+        public function install_plugin(WP_REST_Request $request) {
         $zip_url = sanitize_text_field($request->get_param('zip_url'));
         $plugin_slug = sanitize_text_field($request->get_param('plugin_slug'));
-
+    
         // Include necessary WordPress files for plugin installation
         require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
         require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
         require_once ABSPATH . 'wp-admin/includes/file.php';
         require_once ABSPATH . 'wp-admin/includes/misc.php';
-
+    
         // Create a new instance of Plugin_Upgrader
         $upgrader = new Plugin_Upgrader();
-
+    
         // Install the plugin from the zip URL
         $result = $upgrader->install($zip_url);
-
+    
         if (is_wp_error($result)) {
             return new WP_REST_Response(array('success' => false, 'message' => $result->get_error_message()), 400);
         } else {
@@ -84,7 +84,12 @@ class Plugin_Library_Server {
             if (is_dir($extracted_plugin_dir) && !is_dir($installed_plugin_dir)) {
                 rename($extracted_plugin_dir, $installed_plugin_dir);
             }
-
+    
+            // Get plugin data
+            $plugin_data = get_plugin_data($installed_plugin_dir . '/' . $plugin_slug . '.php');
+            $plugin_name = $plugin_data['Name'];
+            $plugin_version = $plugin_data['Version'];
+    
             // Store plugin info in the custom table
             global $wpdb;
             $table_name = $wpdb->prefix . 'plugin_library_api_info';
@@ -92,8 +97,8 @@ class Plugin_Library_Server {
                 $table_name,
                 array(
                     'plugin_slug' => $plugin_slug,
-                    'plugin_name' => $upgrader->result['destination_name'],
-                    'plugin_version' => $upgrader->result['destination_name'],
+                    'plugin_name' => $plugin_name,
+                    'plugin_version' => $plugin_version,
                     'zip_url' => $zip_url,
                 ),
                 array(
@@ -103,7 +108,7 @@ class Plugin_Library_Server {
                     '%s',
                 )
             );
-
+    
             return new WP_REST_Response(array('success' => true, 'message' => 'Plugin installed successfully.'), 200);
         }
     }
