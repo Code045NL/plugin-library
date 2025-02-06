@@ -7,7 +7,7 @@ class Plugin_Library_Client {
 
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_init', array($this, 'register_settings'));
-        add_action('init', array($this, 'create_custom_table')); // Add this line to call create_custom_table on init
+        add_action('init', array($this, 'create_custom_table'));
     }
 
     public function add_admin_menu() {
@@ -19,95 +19,13 @@ class Plugin_Library_Client {
             'client-plugin-library',
             array($this, 'client_plugin_library_page')
         );
-
-        add_submenu_page(
-            'plugin-library-settings',
-            'Client Settings',
-            'Client Settings',
-            'manage_options',
-            'client-plugin-library-settings',
-            array($this, 'client_plugin_library_settings_page')
-        );
     }
 
     public function client_plugin_library_page() {
-        include PL_PLUGIN_DIR . 'admin/plugin-library-client-page.php';
-    }
-
-    public function client_plugin_library_settings_page() {
-        // Get the settings
-        $remote_url = get_option('plugin_library_client_remote_url');
-        $username = get_option('plugin_library_client_username');
-        $password = get_option('plugin_library_client_password');
-        $debug = get_option('plugin_library_client_debug', false);
-
-        // Initialize variables
-        $installed_plugins_count = 0;
-        $zip_files_count = 0;
-        $plugins = array();
-
-        if (!empty($remote_url) && !empty($username) && !empty($password)) {
-            // Fetch remote plugins from the custom table
-            $response = wp_remote_get($remote_url . '/wp-json/plugin-library/v1/plugins', array(
-                'headers' => array(
-                    'Authorization' => 'Basic ' . base64_encode($username . ':' . $password),
-                ),
-            ));
-
-            if (!is_wp_error($response)) {
-                // Get the response body
-                $body = wp_remote_retrieve_body($response);
-
-                // Decode the JSON response
-                $plugins = json_decode($body, true);
-
-                // Count the number of installed plugins
-                $installed_plugins_count = count($plugins);
-
-                // Count the number of created zip files
-                foreach ($plugins as $plugin) {
-                    if (!empty($plugin['zip_url'])) {
-                        $zip_files_count++;
-                    }
-                }
-            }
-        }
-
-        ?>
-        <div class="wrap">
-            <h1>Client Settings</h1>
-            <h2>Overview</h2>
-            <table class="form-table">
-                <tr>
-                    <th scope="row">Remote Server URL</th>
-                    <td><?php echo esc_html($remote_url); ?></td>
-                </tr>
-                <tr>
-                    <th scope="row">Number of Installed Plugins</th>
-                    <td><?php echo esc_html($installed_plugins_count); ?></td>
-                </tr>
-                <tr>
-                    <th scope="row">Number of Created Zip Files</th>
-                    <td><?php echo esc_html($zip_files_count); ?></td>
-                </tr>
-            </table>
-            <form method="post" action="options.php">
-                <?php
-                settings_fields('plugin_library_client_settings');
-                do_settings_sections('plugin_library_client_settings');
-                submit_button();
-                ?>
-            </form>
-            <?php if ($debug && !empty($plugins)) : ?>
-                <h2>Debug Information</h2>
-                <pre><?php var_dump($plugins); ?></pre>
-            <?php endif; ?>
-        </div>
-        <?php
+        include plugin_dir_path(__FILE__) . '../admin/plugin-library-client-page.php';
     }
 
     public function register_settings() {
-        register_setting('plugin_library_client_settings', 'plugin_library_servers');
         register_setting('plugin_library_client_settings', 'plugin_library_client_debug');
         register_setting('plugin_library_client_settings', 'plugin_library_client_remote_url');
         register_setting('plugin_library_client_settings', 'plugin_library_client_username');
@@ -196,5 +114,20 @@ class Plugin_Library_Client {
         if (!file_exists($backup_dir)) {
             mkdir($backup_dir, 0755, true);
         }
+    }
+
+    public function display_settings() {
+        ?>
+        <div class="wrap">
+            <h2>Client Settings</h2>
+            <form method="post" action="options.php">
+                <?php
+                settings_fields('plugin_library_client_settings');
+                do_settings_sections('plugin_library_client_settings');
+                submit_button();
+                ?>
+            </form>
+        </div>
+        <?php
     }
 }
