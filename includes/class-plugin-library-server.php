@@ -7,6 +7,8 @@ class Plugin_Library_Server {
         add_action('rest_api_init', array($this, 'register_routes'));
         add_action('upgrader_process_complete', array($this, 'upgrader_process_complete'), 10, 2);
         add_action('deleted_plugin', array($this, 'deleted_plugin'), 10, 2);
+        add_action('admin_init', array($this, 'register_settings'));
+        add_action('init', array($this, 'create_custom_table'));
     }
 
     public function add_admin_menu() {
@@ -18,10 +20,34 @@ class Plugin_Library_Server {
             'server-plugin-library',
             array($this, 'server_plugin_library_page')
         );
+
+        add_submenu_page(
+            'plugin-library-settings',
+            'Server Settings',
+            'Server Settings',
+            'manage_options',
+            'server-plugin-library-settings',
+            array($this, 'server_plugin_library_settings_page')
+        );
     }
 
     public function server_plugin_library_page() {
         include plugin_dir_path(__FILE__) . '../admin/plugin-library-server-page.php';
+    }
+
+    public function server_plugin_library_settings_page() {
+        ?>
+        <div class="wrap">
+            <h2>Server Settings</h2>
+            <form method="post" action="options.php">
+                <?php
+                settings_fields('plugin_library_server_settings');
+                do_settings_sections('plugin_library_server_settings');
+                submit_button();
+                ?>
+            </form>
+        </div>
+        <?php
     }
 
     public function register_routes() {
@@ -184,6 +210,18 @@ class Plugin_Library_Server {
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
+
+        $table_name = $wpdb->prefix . 'plugin_library_server_info';
+        $charset_collate = $wpdb->get_charset_collate();
+
+        $sql = "CREATE TABLE $table_name (
+            id mediumint(9) NOT NULL AUTO_INCREMENT,
+            server_option varchar(255) NOT NULL,
+            PRIMARY KEY  (id)
+        ) $charset_collate;";
+
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        dbDelta($sql);
     }
 
     public function create_plugin_zip($plugin_dir, $backup_dir, $plugin_slug) {
@@ -282,6 +320,45 @@ class Plugin_Library_Server {
             DELETE FROM $table_name 
             WHERE plugin_slug NOT IN ($placeholders)
         ", $installed_slugs));
+    }
+
+    public function register_settings() {
+        register_setting('plugin_library_server_settings', 'plugin_library_server_option');
+
+        add_settings_section(
+            'plugin_library_server_settings_section',
+            'Plugin Library Server Settings',
+            null,
+            'plugin_library_server_settings'
+        );
+
+        add_settings_field(
+            'plugin_library_server_option',
+            'Server Option',
+            array($this, 'server_option_callback'),
+            'plugin_library_server_settings',
+            'plugin_library_server_settings_section'
+        );
+    }
+
+    public function server_option_callback() {
+        $option = get_option('plugin_library_server_option', '');
+        echo '<input type="text" name="plugin_library_server_option" value="' . esc_attr($option) . '" class="regular-text">';
+    }
+
+    public function display_settings() {
+        ?>
+        <div class="wrap">
+            <h2>Server Settings</h2>
+            <form method="post" action="options.php">
+                <?php
+                settings_fields('plugin_library_server_settings');
+                do_settings_sections('plugin_library_server_settings');
+                submit_button();
+                ?>
+            </form>
+        </div>
+        <?php
     }
 }
 
