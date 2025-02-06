@@ -31,7 +31,7 @@
         
 
         // Display the list of plugins in a table
-        echo '<h2>Available Plugins</h2>';
+        echo '<h2>Remote Plugins</h2>';
         echo '<table class="widefat fixed" cellspacing="0">';
         echo '<thead><tr><th>Name</th><th>Version</th><th>Action</th></tr></thead>';
         echo '<tbody>';

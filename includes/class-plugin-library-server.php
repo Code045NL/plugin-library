@@ -13,32 +13,23 @@ class Plugin_Library_Server {
 
     public function add_admin_menu() {
         add_submenu_page(
-            'plugin-library',
-            'Server Plugin List',
-            'Server Plugin List',
+            'remote-library',
+            'Remote Plugin List',
+            'Plugins on Remote Srver',
             'manage_options',
-            'server-plugin-library',
-            array($this, 'server_plugin_library_page')
-        );
-
-        add_submenu_page(
-            'plugin-library-settings',
-            'Server Settings',
-            'Server Settings',
-            'manage_options',
-            'server-plugin-library-settings',
-            array($this, 'server_plugin_library_settings_page')
+            'remote-plugin-library',
+            array($this, 'remote_plugin_library_page')
         );
     }
 
-    public function server_plugin_library_page() {
+    public function remote_plugin_library_page() {
         include plugin_dir_path(__FILE__) . '../admin/plugin-library-server-page.php';
     }
 
     public function server_plugin_library_settings_page() {
         ?>
         <div class="wrap">
-            <h2>Server Settings</h2>
+            <h2>Remote Server Settings</h2>
             <form method="post" action="options.php">
                 <?php
                 settings_fields('plugin_library_server_settings');

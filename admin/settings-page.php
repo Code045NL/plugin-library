@@ -1,6 +1,6 @@
 <?php
 
-function plugin_library_settings_page() {
+function remote_library_settings_page() {
     $mode = get_option('plugin_library_mode', 'client'); // Default to client mode
     $debug = get_option('plugin_library_client_debug', false); // Get the debug option
     $api_results = null;
@@ -27,7 +27,7 @@ function plugin_library_settings_page() {
     }
     ?>
     <div class="wrap">
-        <h1>Plugin Library Settings</h1>
+        <h1>Remote Library Settings</h1>
         <form method="post" action="options.php">
             <?php
             settings_fields('plugin_library_settings');
