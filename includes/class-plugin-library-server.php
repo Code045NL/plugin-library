@@ -48,15 +48,24 @@ class Plugin_Library_Server {
     
         // Prepare the response
         $plugins = array();
+        $backup_dir = ABSPATH . 'plugin-library';
+        
         foreach ($all_plugins as $plugin_file => $plugin_data) {
-            $plugins[] = array(
-                'slug' => dirname($plugin_file),
-                'name' => $plugin_data['Name'],
-                'version' => $plugin_data['Version'],
-            );
+            $plugin_slug = dirname($plugin_file);
+            $zip_file = $backup_dir . '/' . $plugin_slug . '.zip';
+        
+            if (file_exists($zip_file)) {
+                $plugins[] = array(
+                    'slug' => $plugin_slug,
+                    'name' => $plugin_data['Name'],
+                    'version' => $plugin_data['Version'],
+                    'zip_url' => home_url('/plugin-library/' . $plugin_slug . '.zip'),
+                );
+            }
         }
-    
+        
         return new WP_REST_Response($plugins, 200);
+    
     }
 
         public function install_plugin(WP_REST_Request $request) {

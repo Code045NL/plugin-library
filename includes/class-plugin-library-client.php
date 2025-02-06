@@ -1,6 +1,4 @@
 <?php
-// filepath: /workspaces/plugin-library/includes/class-plugin-library-client.php
-
 class Plugin_Library_Client {
     private $servers;
 
@@ -9,6 +7,7 @@ class Plugin_Library_Client {
 
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_init', array($this, 'register_settings'));
+        add_action('init', array($this, 'create_custom_table')); // Add this line to call create_custom_table on init
     }
 
     public function add_admin_menu() {
@@ -20,14 +19,158 @@ class Plugin_Library_Client {
             'client-plugin-library',
             array($this, 'client_plugin_library_page')
         );
+
+        add_submenu_page(
+            'plugin-library-settings',
+            'Client Settings',
+            'Client Settings',
+            'manage_options',
+            'client-plugin-library-settings',
+            array($this, 'client_plugin_library_settings_page')
+        );
     }
 
     public function client_plugin_library_page() {
-        include plugin_dir_path(__FILE__) . '../admin/plugin-library-client-page.php';
+        include PL_PLUGIN_DIR . 'admin/plugin-library-client-page.php';
+    }
+
+    public function client_plugin_library_settings_page() {
+        // Get the settings
+        $remote_url = get_option('plugin_library_client_remote_url');
+        $username = get_option('plugin_library_client_username');
+        $password = get_option('plugin_library_client_password');
+        $debug = get_option('plugin_library_client_debug', false);
+
+        // Initialize variables
+        $installed_plugins_count = 0;
+        $zip_files_count = 0;
+        $plugins = array();
+
+        if (!empty($remote_url) && !empty($username) && !empty($password)) {
+            // Fetch remote plugins from the custom table
+            $response = wp_remote_get($remote_url . '/wp-json/plugin-library/v1/plugins', array(
+                'headers' => array(
+                    'Authorization' => 'Basic ' . base64_encode($username . ':' . $password),
+                ),
+            ));
+
+            if (!is_wp_error($response)) {
+                // Get the response body
+                $body = wp_remote_retrieve_body($response);
+
+                // Decode the JSON response
+                $plugins = json_decode($body, true);
+
+                // Count the number of installed plugins
+                $installed_plugins_count = count($plugins);
+
+                // Count the number of created zip files
+                foreach ($plugins as $plugin) {
+                    if (!empty($plugin['zip_url'])) {
+                        $zip_files_count++;
+                    }
+                }
+            }
+        }
+
+        ?>
+        <div class="wrap">
+            <h1>Client Settings</h1>
+            <h2>Overview</h2>
+            <table class="form-table">
+                <tr>
+                    <th scope="row">Remote Server URL</th>
+                    <td><?php echo esc_html($remote_url); ?></td>
+                </tr>
+                <tr>
+                    <th scope="row">Number of Installed Plugins</th>
+                    <td><?php echo esc_html($installed_plugins_count); ?></td>
+                </tr>
+                <tr>
+                    <th scope="row">Number of Created Zip Files</th>
+                    <td><?php echo esc_html($zip_files_count); ?></td>
+                </tr>
+            </table>
+            <form method="post" action="options.php">
+                <?php
+                settings_fields('plugin_library_client_settings');
+                do_settings_sections('plugin_library_client_settings');
+                submit_button();
+                ?>
+            </form>
+            <?php if ($debug && !empty($plugins)) : ?>
+                <h2>Debug Information</h2>
+                <pre><?php var_dump($plugins); ?></pre>
+            <?php endif; ?>
+        </div>
+        <?php
     }
 
     public function register_settings() {
         register_setting('plugin_library_client_settings', 'plugin_library_servers');
+        register_setting('plugin_library_client_settings', 'plugin_library_client_debug');
+        register_setting('plugin_library_client_settings', 'plugin_library_client_remote_url');
+        register_setting('plugin_library_client_settings', 'plugin_library_client_username');
+        register_setting('plugin_library_client_settings', 'plugin_library_client_password');
+
+        add_settings_section(
+            'plugin_library_client_settings_section',
+            'Plugin Library Client Settings',
+            null,
+            'plugin_library_client_settings'
+        );
+
+        add_settings_field(
+            'plugin_library_client_debug',
+            'Enable Debug Options',
+            array($this, 'debug_option_callback'),
+            'plugin_library_client_settings',
+            'plugin_library_client_settings_section'
+        );
+
+        add_settings_field(
+            'plugin_library_client_remote_url',
+            'Remote URL',
+            array($this, 'remote_url_callback'),
+            'plugin_library_client_settings',
+            'plugin_library_client_settings_section'
+        );
+
+        add_settings_field(
+            'plugin_library_client_username',
+            'Username',
+            array($this, 'username_callback'),
+            'plugin_library_client_settings',
+            'plugin_library_client_settings_section'
+        );
+
+        add_settings_field(
+            'plugin_library_client_password',
+            'Password',
+            array($this, 'password_callback'),
+            'plugin_library_client_settings',
+            'plugin_library_client_settings_section'
+        );
+    }
+
+    public function debug_option_callback() {
+        $debug = get_option('plugin_library_client_debug', false);
+        echo '<input type="checkbox" name="plugin_library_client_debug" value="1"' . checked(1, $debug, false) . '>';
+    }
+
+    public function remote_url_callback() {
+        $remote_url = get_option('plugin_library_client_remote_url', '');
+        echo '<input type="text" name="plugin_library_client_remote_url" value="' . esc_attr($remote_url) . '" class="regular-text">';
+    }
+
+    public function username_callback() {
+        $username = get_option('plugin_library_client_username', '');
+        echo '<input type="text" name="plugin_library_client_username" value="' . esc_attr($username) . '" class="regular-text">';
+    }
+
+    public function password_callback() {
+        $password = get_option('plugin_library_client_password', '');
+        echo '<input type="password" name="plugin_library_client_password" value="' . esc_attr($password) . '" class="regular-text">';
     }
 
     public function create_custom_table() {
@@ -40,96 +183,18 @@ class Plugin_Library_Client {
             plugin_slug varchar(255) NOT NULL,
             plugin_name varchar(255) NOT NULL,
             plugin_version varchar(255) NOT NULL,
-            server_plugin_id varchar(255) NOT NULL,
+            zip_url varchar(255) NOT NULL,
             server_url varchar(255) NOT NULL,
             PRIMARY KEY  (id)
         ) $charset_collate;";
 
         require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
         dbDelta($sql);
-    }
 
-    public function get_installed_plugins($server_url, $username, $password) {
-        $response = wp_remote_get($server_url . '/wp-json/plugin-library/v1/plugins', array(
-            'headers' => array(
-                'Authorization' => 'Basic ' . base64_encode($username . ':' . $password)
-            )
-        ));
-
-        if (is_wp_error($response)) {
-            return array();
-        }
-
-        $body = wp_remote_retrieve_body($response);
-        return json_decode($body, true);
-    }
-
-    public function get_plugin_groups($server_url, $username, $password) {
-        $response = wp_remote_get($server_url . '/wp-json/plugin-library/v1/plugin-groups', array(
-            'headers' => array(
-                'Authorization' => 'Basic ' . base64_encode($username . ':' . $password)
-            )
-        ));
-
-        if (is_wp_error($response)) {
-            return array();
-        }
-
-        $body = wp_remote_retrieve_body($response);
-        return json_decode($body, true);
-    }
-
-    public function install_plugin(WP_REST_Request $request) {
-        $zip_url = sanitize_text_field($request->get_param('zip_url'));
-        $plugin_slug = sanitize_text_field($request->get_param('plugin_slug'));
-        $server_plugin_id = sanitize_text_field($request->get_param('server_plugin_id'));
-        $server_url = sanitize_text_field($request->get_param('server_url'));
-
-        // Include necessary WordPress files for plugin installation
-        require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
-        require_once ABSPATH . 'wp-admin/includes/plugin-install.php';
-        require_once ABSPATH . 'wp-admin/includes/file.php';
-        require_once ABSPATH . 'wp-admin/includes/misc.php';
-
-        // Create a new instance of Plugin_Upgrader
-        $upgrader = new Plugin_Upgrader();
-
-        // Install the plugin from the zip URL
-        $result = $upgrader->install($zip_url);
-
-        if (is_wp_error($result)) {
-            return new WP_REST_Response(array('success' => false, 'message' => $result->get_error_message()), 400);
-        } else {
-            // Rename the plugin folder to the slug
-            $installed_plugin_dir = WP_PLUGIN_DIR . '/' . $plugin_slug;
-            $extracted_plugin_dir = WP_PLUGIN_DIR . '/' . $upgrader->result['destination_name'];
-            if (is_dir($extracted_plugin_dir) && !is_dir($installed_plugin_dir)) {
-                rename($extracted_plugin_dir, $installed_plugin_dir);
-            }
-
-            // Store plugin info in the custom table
-            global $wpdb;
-            $table_name = $wpdb->prefix . 'plugin_library_client_info';
-            $wpdb->replace(
-                $table_name,
-                array(
-                    'plugin_slug' => $plugin_slug,
-                    'plugin_name' => $upgrader->result['destination_name'],
-                    'plugin_version' => $upgrader->result['destination_name'],
-                    'server_plugin_id' => $server_plugin_id,
-                    'server_url' => $server_url,
-                ),
-                array(
-                    '%s',
-                    '%s',
-                    '%s',
-                    '%s',
-                    '%s',
-                )
-            );
-
-            return new WP_REST_Response(array('success' => true, 'message' => 'Plugin installed successfully.'), 200);
+        // Ensure the backup directory exists
+        $backup_dir = ABSPATH . 'plugin-library';
+        if (!file_exists($backup_dir)) {
+            mkdir($backup_dir, 0755, true);
         }
     }
 }
-?>
