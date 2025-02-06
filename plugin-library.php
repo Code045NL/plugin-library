@@ -15,17 +15,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-plugin-library-server.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-plugin-library-client.php';
 require_once plugin_dir_path( __FILE__ ) . 'admin/settings-page.php';
-
-function remote_library_add_settings_page() {
-    add_menu_page(
-        'Plugin Library',
-        'Plugin Library',
-        'manage_options',
-        'remote-library',
-        'remote_library_settings_page'
-    );
-}
-add_action('admin_menu', 'remote_library_add_settings_page');
+require_once plugin_dir_path( __FILE__ ) . 'admin/dashboard-page.php';
 
 // Initialize the plugin
 function plugin_library_init() {
@@ -41,3 +31,15 @@ function plugin_library_init() {
     }
 }
 add_action('plugins_loaded', 'plugin_library_init');
+
+// Add settings page to the admin menu
+function plugin_library_add_settings_page() {
+    add_menu_page(
+        'Plugin Library',
+        'Plugin Library',
+        'manage_options',
+        'plugin-library-dashboard',
+        'plugin_library_dashboard_page'
+    );
+}
+add_action('admin_menu', 'plugin_library_add_settings_page');
