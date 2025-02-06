@@ -16,6 +16,17 @@ require_once plugin_dir_path( __FILE__ ) . 'includes/class-plugin-library-server
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-plugin-library-client.php';
 require_once plugin_dir_path( __FILE__ ) . 'admin/settings-page.php';
 
+function plugin_library_add_settings_page() {
+    add_menu_page(
+        'Plugin Library',
+        'Plugin Library',
+        'manage_options',
+        'plugin-library',
+        'plugin_library_settings_page'
+    );
+}
+add_action('admin_menu', 'plugin_library_add_settings_page');
+
 // Initialize the plugin
 function plugin_library_init() {
     // Conditionally include and initialize the correct class based on the mode

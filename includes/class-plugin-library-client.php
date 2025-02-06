@@ -12,7 +12,7 @@ class Plugin_Library_Client {
 
     public function add_admin_menu() {
         add_submenu_page(
-            'plugin-library-settings',
+            'plugin-library',
             'Client Plugin List',
             'Client Plugin List',
             'manage_options',

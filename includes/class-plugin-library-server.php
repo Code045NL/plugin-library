@@ -11,7 +11,7 @@ class Plugin_Library_Server {
 
     public function add_admin_menu() {
         add_submenu_page(
-            'plugin-library-settings',
+            'plugin-library',
             'Server Plugin List',
             'Server Plugin List',
             'manage_options',
@@ -284,4 +284,6 @@ class Plugin_Library_Server {
         ", $installed_slugs));
     }
 }
+
+
 ?>
