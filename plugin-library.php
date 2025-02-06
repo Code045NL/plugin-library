@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 // Include necessary files
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-plugin-library-server.php';
 require_once plugin_dir_path( __FILE__ ) . 'includes/class-plugin-library-client.php';
-require_once plugin_dir_path( __FILE__ ) . 'includes/plugin-library-settings.php';
+require_once plugin_dir_path( __FILE__ ) . 'admin/settings-page.php';
 
 // Initialize the plugin
 function plugin_library_init() {
